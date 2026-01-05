@@ -1,14 +1,20 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 
 class DataPreprocessor:
-    def __init__(self, file_path):
+    def __init__(self, file_path, scaler_type='standard'):
         self.file_path = file_path
         self.data = None
         self.df_clean = None
-        self.scaler = StandardScaler()
+        # Select scaler logic
+        if scaler_type == 'minmax':
+            self.scaler = MinMaxScaler()
+        elif scaler_type == 'robust':
+            self.scaler = RobustScaler()
+        else:
+            self.scaler = StandardScaler()
 
     def load_data(self):
         """Loads data from the CSV file."""
@@ -50,22 +56,6 @@ class DataPreprocessor:
         self.df_clean = cleaned_data
 
         return self.df_clean
-        # original_count = len(self.data)
-        # df_clean = self.data.copy()
-        #
-        # for col in columns:
-        #     Q1 = df_clean[col].quantile(0.25)
-        #     Q3 = df_clean[col].quantile(0.75)
-        #     IQR = Q3 - Q1
-        #     lower_bound = Q1 - threshold * IQR
-        #     upper_bound = Q3 + threshold * IQR
-        #
-        #     # Filter
-        #     df_clean = df_clean[(df_clean[col] >= lower_bound) & (df_clean[col] <= upper_bound)]
-        #
-        # self.data = df_clean  # Update the internal state
-        # removed_count = original_count - len(self.data)
-        # return self.data, removed_count
 
     def plot_boxplots(self, columns):
         """Visualizes distribution to spot outliers."""

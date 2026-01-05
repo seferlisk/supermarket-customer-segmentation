@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 class ClusterVisualizer:
     def plot_optimization(self, k_range, inertia, silhouette):
         """Plots the Elbow Curve and Silhouette Scores side-by-side."""

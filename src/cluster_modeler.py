@@ -4,10 +4,7 @@ from sklearn.metrics import silhouette_score
 class ClusterModeler:
     def __init__(self, X):
         self.X = X
-        self.inertia_ = []
-        self.silhouette_scores_ = []
         self.k_range = range(2, 11)
-        self.models = {}
 
     def find_optimal_k(self):
         """Calculates inertia and silhouette scores for a range of k."""
