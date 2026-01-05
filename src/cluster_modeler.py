@@ -11,15 +11,16 @@ class ClusterModeler:
 
     def find_optimal_k(self):
         """Calculates inertia and silhouette scores for a range of k."""
+        inertia = []
+        sil_scores = []
         for k in self.k_range:
-            kmeans = KMeans(n_clusters=k, init='k-means++', random_state=42, n_init=10)
-            kmeans.fit(self.X)
+            km = KMeans(n_clusters=k, init='k-means++', random_state=42, n_init=10)
+            km.fit(self.X)
+            inertia.append(km.inertia_)
+            sil_scores.append(silhouette_score(self.X, km.labels_))
+        return inertia, sil_scores
 
-            self.inertia_.append(kmeans.inertia_)
-            self.silhouette_scores_.append(silhouette_score(self.X, kmeans.labels_))
-            self.models[k] = kmeans
-
-        return self.inertia_, self.silhouette_scores_
-
-    def get_model(self, k):
-        return self.models.get(k)
+    def train_model(self, k):
+        self.model = KMeans(n_clusters=k, init='k-means++', random_state=42, n_init=10)
+        labels = self.model.fit_predict(self.X)
+        return labels

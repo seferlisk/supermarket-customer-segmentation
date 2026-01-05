@@ -1,12 +1,14 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.preprocessing import StandardScaler
 
 class DataPreprocessor:
     def __init__(self, file_path):
         self.file_path = file_path
         self.data = None
-        self.X = None
+        self.df_clean = None
+        self.scaler = StandardScaler()
 
     def load_data(self):
         """Loads data from the CSV file."""
@@ -31,25 +33,39 @@ class DataPreprocessor:
         Removes outliers based on the IQR method.
         Returns the cleaned dataframe and the number of rows removed.
         """
-        if self.data is None:
-            raise ValueError("Data not loaded.")
+        if self.data is None: raise ValueError("Data not loaded.")
 
-        original_count = len(self.data)
-        df_clean = self.data.copy()
+        # CRITICAL: We perform the cleaning on a copy
+        cleaned_data = self.data.copy()
 
         for col in columns:
-            Q1 = df_clean[col].quantile(0.25)
-            Q3 = df_clean[col].quantile(0.75)
+            Q1 = cleaned_data[col].quantile(0.25)
+            Q3 = cleaned_data[col].quantile(0.75)
             IQR = Q3 - Q1
             lower_bound = Q1 - threshold * IQR
             upper_bound = Q3 + threshold * IQR
+            cleaned_data = cleaned_data[(cleaned_data[col] >= lower_bound) & (cleaned_data[col] <= upper_bound)]
 
-            # Filter
-            df_clean = df_clean[(df_clean[col] >= lower_bound) & (df_clean[col] <= upper_bound)]
+        # CRITICAL: We assign the result back to the class attribute
+        self.df_clean = cleaned_data
 
-        self.data = df_clean  # Update the internal state
-        removed_count = original_count - len(self.data)
-        return self.data, removed_count
+        return self.df_clean
+        # original_count = len(self.data)
+        # df_clean = self.data.copy()
+        #
+        # for col in columns:
+        #     Q1 = df_clean[col].quantile(0.25)
+        #     Q3 = df_clean[col].quantile(0.75)
+        #     IQR = Q3 - Q1
+        #     lower_bound = Q1 - threshold * IQR
+        #     upper_bound = Q3 + threshold * IQR
+        #
+        #     # Filter
+        #     df_clean = df_clean[(df_clean[col] >= lower_bound) & (df_clean[col] <= upper_bound)]
+        #
+        # self.data = df_clean  # Update the internal state
+        # removed_count = original_count - len(self.data)
+        # return self.data, removed_count
 
     def plot_boxplots(self, columns):
         """Visualizes distribution to spot outliers."""
@@ -59,6 +75,19 @@ class DataPreprocessor:
             sns.boxplot(y=self.data[col])
             plt.title(f'Boxplot of {col}')
         plt.tight_layout()
+        plt.show()
+
+    def get_scaled_features(self, columns):
+        """Scales the selected features and returns the scaled array. If data isn't cleaned yet,
+        it cleans it automatically."""
+        # Check if df_clean exists
+        if self.df_clean is None:
+            print("Warning: remove_outliers() was not called. Calling it automatically now...")
+            self.remove_outliers(columns)
+
+        X = self.df_clean[columns].values
+        X_scaled = self.scaler.fit_transform(X)
+        return X_scaled
 
     def check_nulls(self):
         """Checks for missing values in the dataset."""
