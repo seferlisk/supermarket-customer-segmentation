@@ -1,0 +1,2 @@
+class ClusterModeler:
+    pass
