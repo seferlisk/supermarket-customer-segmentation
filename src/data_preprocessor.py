@@ -23,3 +23,11 @@ class DataPreprocessor:
         if self.data is None:
             return None, None
         return self.data.head(), self.data.info()
+
+    def check_nulls(self):
+        """Checks for missing values in the dataset."""
+        if self.data is None:
+            raise ValueError("Data not loaded. Call load_data() first.")
+        null_counts = self.data.isnull().sum()
+        has_nulls = null_counts.sum() > 0
+        return null_counts, has_nulls
