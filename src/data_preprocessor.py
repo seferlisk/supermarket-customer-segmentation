@@ -1,4 +1,6 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 class DataPreprocessor:
     def __init__(self, file_path):
@@ -24,6 +26,40 @@ class DataPreprocessor:
             return None, None
         return self.data.head(), self.data.info()
 
+    def remove_outliers(self, columns, threshold=1.5):
+        """
+        Removes outliers based on the IQR method.
+        Returns the cleaned dataframe and the number of rows removed.
+        """
+        if self.data is None:
+            raise ValueError("Data not loaded.")
+
+        original_count = len(self.data)
+        df_clean = self.data.copy()
+
+        for col in columns:
+            Q1 = df_clean[col].quantile(0.25)
+            Q3 = df_clean[col].quantile(0.75)
+            IQR = Q3 - Q1
+            lower_bound = Q1 - threshold * IQR
+            upper_bound = Q3 + threshold * IQR
+
+            # Filter
+            df_clean = df_clean[(df_clean[col] >= lower_bound) & (df_clean[col] <= upper_bound)]
+
+        self.data = df_clean  # Update the internal state
+        removed_count = original_count - len(self.data)
+        return self.data, removed_count
+
+    def plot_boxplots(self, columns):
+        """Visualizes distribution to spot outliers."""
+        plt.figure(figsize=(10, 5))
+        for i, col in enumerate(columns, 1):
+            plt.subplot(1, len(columns), i)
+            sns.boxplot(y=self.data[col])
+            plt.title(f'Boxplot of {col}')
+        plt.tight_layout()
+
     def check_nulls(self):
         """Checks for missing values in the dataset."""
         if self.data is None:
@@ -31,3 +67,4 @@ class DataPreprocessor:
         null_counts = self.data.isnull().sum()
         has_nulls = null_counts.sum() > 0
         return null_counts, has_nulls
+
