@@ -50,3 +50,31 @@ class ClusterVisualizer:
 
         plt.tight_layout()
         # plt.savefig('cluster_segmentation_3d.png')
+
+    def plot_rotated_clusters(self, df, labels, columns, elev=30, azim=45):
+        """Visualizes clusters in 3D using customizable points of view."""
+        fig = plt.figure(figsize=(12, 8))
+        ax = fig.add_subplot(111, projection='3d')
+
+        x_col, y_col, z_col = columns[0], columns[1], columns[2]
+
+        # Loop for custom legend to ensure colors match labels
+        unique_labels = set(labels)
+        colors = plt.cm.viridis(np.linspace(0, 1, len(unique_labels)))
+
+        for label, color in zip(unique_labels, colors):
+            subset = df[df['Cluster'] == label]
+            ax.scatter(subset[x_col], subset[y_col], subset[z_col],
+                       c=[color], label=f'Cluster {label}', s=60, alpha=0.6)
+
+        ax.set_xlabel(x_col)
+        ax.set_ylabel(y_col)
+        ax.set_zlabel(z_col)
+        ax.set_title(f'Customer Segments (View: Elev={elev}, Azim={azim})')
+
+        # Apply the rotation
+        ax.view_init(elev=elev, azim=azim)
+
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
