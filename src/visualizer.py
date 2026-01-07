@@ -53,7 +53,7 @@ class ClusterVisualizer:
 
     def plot_rotated_clusters(self, df, labels, columns, elev=30, azim=45):
         """Visualizes clusters in 3D using customizable points of view."""
-        fig = plt.figure(figsize=(12, 8))
+        fig = plt.figure(figsize=(15, 13))
         ax = fig.add_subplot(111, projection='3d')
 
         x_col, y_col, z_col = columns[0], columns[1], columns[2]
